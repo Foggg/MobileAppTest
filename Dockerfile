@@ -1,83 +1,28 @@
-#________            _________                ________              ______      ______  ___     ______ ___________          __________
-#__  ___/________   ___  ____/____________ ______  __ )_____ __________  /__    ___   |/  /________  /____(_)__  /____      ___  ____/_____ ______________ ___
-#_____ \_  __ \_ | / /  /    _  __ \_  __ `__ \_  __  |  __ `/_  __ \_  //_/    __  /|_/ /_  __ \_  __ \_  /__  /_  _ \     __  /_   _  __ `/_  ___/_  __ `__ \
-#____/ // /_/ /_ |/ // /___  / /_/ /  / / / / /  /_/ // /_/ /_  / / /  ,<       _  /  / / / /_/ /  /_/ /  / _  / /  __/     _  __/   / /_/ /_  /   _  / / / / /
-#____/ \____/_____/ \____/  \____//_/ /_/ /_//_____/ \__,_/ /_/ /_//_/|_|      /_/  /_/  \____//_.___//_/  /_/  \___/      /_/      \__,_/ /_/    /_/ /_/ /_/
+FROM dockerfog/android-base-image:latest
 
-#=====================
-# Debian + JDK17
-#=====================
-FROM openjdk:17-ea-slim-buster
+ENV NODE_VERSION=20
+ENV APPIUM_VERSION=2.17.1
+ENV APPIUM_DRIVER_UIAUTOMATOR2_VERSION=4.2.0
+ENV APPIUM_DRIVER_XCUITEST_VERSION=9.2.0
+ENV DEVICE_FARM=9.8.5
 
-ENV DEBIAN_FRONTEND=noninteractive
-
-#=====================================================
-# Обновляемся и инсталируем необходимые нам библиотеки
-#=====================================================
 RUN apt-get -qqy update
-RUN apt-get -qqy --no-install-recommends install ca-certificates tzdata zip unzip curl wget libqt5webkit5 libgconf-2-4 xvfb gnupg sudo procps xvfb usbutils \
+RUN apt-get -qqy --no-install-recommends install curl git libimobiledevice-utils libimobiledevice6 usbmuxd \
 && rm -rf /var/lib/apt/lists/*
 
-#========================
-# Устанавливаем Тайм Зону
-#========================
-ENV TZ = "Asia/Vladivostok"
-RUN echo "${TZ}" > /etc/timezone \
-  && dpkg-reconfigure --frontend noninteractive tzdata
-
-#==========================================
-# Создаём пользователя и рабочую директорию
-#==========================================
-ARG USER_PASS=secret
-RUN groupadd fermausr \
-         --gid 1301 \
-  && useradd fermausr \
-         --uid 1300 \
-         --gid 1301 \
+RUN useradd fermausr \
          --create-home \
-         --shell /bin/bash \
-  && usermod -aG sudo fermausr \
-  && echo fermausr:${USER_PASS} | chpasswd \
-  && echo 'fermausr ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
-
+         --shell /bin/bash
 WORKDIR /home/fermausr
+RUN touch ferma.log
 
-#======================
-# Добавляем Android SDK
-#======================
-ENV SDK_VERSION=commandlinetools-linux-8512546_latest
-ENV ANDROID_BUILD_TOOLS_VERSION=34.0.0
-ENV ANDROID_FOLDER_NAME=cmdline-tools
-ENV ANDROID_ADB_SERVER_ADDRESS=host.docker.internal
-ENV ANDROID_DOWNLOAD_PATH=/home/fermausr/${ANDROID_FOLDER_NAME} \
-    ANDROID_HOME=/opt/android \
-    ANDROID_TOOL_HOME=/opt/android/${ANDROID_FOLDER_NAME}
-
-RUN wget -O tools.zip https://dl.google.com/android/repository/${SDK_VERSION}.zip && \
-    unzip tools.zip && rm tools.zip && \
-    chmod a+x -R ${ANDROID_DOWNLOAD_PATH} && \
-    chown -R 1300:1301 ${ANDROID_DOWNLOAD_PATH} && \
-    mkdir -p ${ANDROID_TOOL_HOME} && \
-    mv ${ANDROID_DOWNLOAD_PATH} ${ANDROID_TOOL_HOME}/tools
-ENV PATH=$PATH:${ANDROID_TOOL_HOME}/tools:${ANDROID_TOOL_HOME}/tools/bin
-
-RUN mkdir -p ~/.android && \
-    touch ~/.android/repositories.cfg && \
-    echo y | sdkmanager "platform-tools" && \
-    echo y | sdkmanager "build-tools;$ANDROID_BUILD_TOOLS_VERSION" && \
-    mv ~/.android .android && \
-    chown -R 1300:1301 .android
-ENV PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools
-
-#===========================
-# Ставим nodejs, npm, appium
-#===========================
-ENV NODE_VERSION=20
-ENV APPIUM_VERSION=2.11.3
 RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash && \
     apt-get -qqy install nodejs && \
     npm init && \
-    npm install -g appium@${APPIUM_VERSION} --loglevel verbose && \
+    npm install -g appium@${APPIUM_VERSION} && \
+    npm install -g prisma && \
+    npx prisma init && \
+    prisma generate --allow-no-models && \
     exit 0 && \
     npm cache clean && \
     apt-get remove --purge -y npm && \
@@ -85,52 +30,20 @@ RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     apt-get clean
 
-#=============
-# Чиним доступ
-#=============
-RUN chown -R 1300:1301 /usr/lib/node_modules/appium
+RUN npm i -g go-ios
 
-#==========================
-# Копируем стартовый скрипт
-#==========================
-ENV SCRIPT_PATH="appium-docker"
-RUN mkdir -p ${SCRIPT_PATH}
-COPY start.sh \
-     ${SCRIPT_PATH}/
-RUN chown -R 1300:1301 ${SCRIPT_PATH}
-ENV APP_PATH=/home/fermausr/${SCRIPT_PATH}
-
-#====================
-# Используем пользюка
-#====================
-USER 1300:1301
-
-#=========================================
-# Устанавливаем драйвера для Android и IoS
-#=========================================
-ENV APPIUM_DRIVER_UIAUTOMATOR2_VERSION="3.7.7"
-#ENV APPIUM_DRIVER_XCUITEST_VERSION="7.24.15"
+USER fermausr
 
 RUN appium driver install uiautomator2@${APPIUM_DRIVER_UIAUTOMATOR2_VERSION}
-#appium driver install xcuitest@${APPIUM_DRIVER_XCUITEST_VERSION}
+RUN appium driver install xcuitest@${APPIUM_DRIVER_XCUITEST_VERSION}
 
-#================================
-# Устанавливаем плагины для фермы
-#================================
-ENV DEVICE_FARM=9.1.4
-ENV DASHBOARD=2.0.3
+COPY WDA21.ipa /home/fermausr/wda.ipa
 
-RUN appium plugin install --source=npm appium-device-farm@${DEVICE_FARM} && \
-    appium plugin install --source=npm appium-dashboard@${DASHBOARD}
-
-#================
-# Открываем порты
-#---------------
-# 4723 Appium
-#================
 EXPOSE 4723
 
-#=================
-# Запускаем Скрипт
-#=================
-CMD ./${SCRIPT_PATH}/start.sh
+COPY startAppium.sh /
+ENTRYPOINT ["/bin/bash","-c","/startAppium.sh"]
+
+#ENTRYPOINT ["appium"]
+#ADD https://nexus.sovcombank.group/repository/appium-device-farm/device-farm.apk /home/fermausr/.appium/node_modules/appium-device-farm/lib/stream.apk
+#ENTRYPOINT ["appium", "server", "-ka", "800", "--use-plugins=device-farm", "-pa", "/wd/hub", "--plugin-device-farm-platform=android", "--plugin-device-farm-max-sessions=30", "--plugin-device-farm-remote-connection-timeout=120000", "--allow-cors", "--relaxed-security", "--log", "ferma.log", "--log-level", "error:warn"]

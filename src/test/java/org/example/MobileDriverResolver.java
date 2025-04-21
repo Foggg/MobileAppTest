@@ -3,6 +3,7 @@ package org.example;
 import static com.codeborne.selenide.Selenide.closeWebDriver;
 import static com.codeborne.selenide.Selenide.open;
 import static com.codeborne.selenide.appium.AppiumDriverRunner.getAndroidDriver;
+import static com.codeborne.selenide.appium.AppiumDriverRunner.getIosDriver;
 
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
@@ -34,7 +35,7 @@ public class MobileDriverResolver implements BeforeEachCallback, AfterEachCallba
             Configuration.timeout = CONFIGURATION_TIMEOUT;
             Configuration.browser = CustomMobileDriver.class.getName();
             open();
-            getAndroidDriver().activateApp("com.FogGamesCorporation.FoggySpaceShooter");
+            //getAndroidDriver().activateApp("com.sovcombank.mpp");
         } finally {
             REENTRANT_LOCK.unlock();
         }
