@@ -1,0 +1,7 @@
+export ANDROID_HOME="/home/fog/Загрузки/platform-tools"
+export GO_IOS="/usr/local/bin/ios"
+
+appium server -ka 800 --use-plugins=device-farm  -pa /wd/hub --plugin-device-farm-platform=both --plugin-device-farm-ios-device-type=real
+
+
+ios forward 7777

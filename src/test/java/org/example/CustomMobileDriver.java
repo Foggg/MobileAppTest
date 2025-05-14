@@ -35,26 +35,6 @@ public class CustomMobileDriver implements WebDriverProvider {
         options.merge(capabilities);
         options.setAppPackage("com.sovcombank.mpp");
         options.setAppActivity("com.sovcombank.mpp.start.view.StartActivity");
-//        options.setCapability("unlockType", "pin"); //device pin
-//        options.setCapability("allowInvisibleElements", true);
-//        options.setCapability("appium:settings[allowInvisibleElements]", true);
-//        options.setCapability("appium:remoteAdbHost", "host.docker.internal");
-//        options.setCapability("appium:remoteAdbPort", "5037");
-//        options.setCapability("df:liveVideo", false);
-//        options.setCapability("df:recordVideo", false);
-//        options.setCapability("appWaitforLaunch", false);
-//        options.setCapability("disableAndroidWatchers", true);
-//        options.setCapability("noSign", false); // Пропустить проверку и подписание приложения с помощью отладочных ключей
-        options.setCapability("uiautomator2ServerLaunchTimeout", "180000"); // number of milliseconds to wait util UiAutomator2Server is listening on the device. 30000 ms by default
-//        options.setCapability("allow-cors", true);
-//        options.setCapability("appium:waitForQuiescence", false);
-//        options.setCapability("newCommandTimeout", "300"); // как минимум 300сек, чтобы сессия доживала до конца установки апк
-//        options.setCapability("appium:disableIdLocatorAutocompletion", true);
-//        options.setCapability("project", "ЕМП/МП МК v2.0");
-
-//        options.setAutoGrantPermissions(true);
-//        options.setNoReset(true);
-//        options.setSkipDeviceInitialization(true);
 
         try {
             var remoteAddress = new URL("http://127.0.0.1:4723/wd/hub");
@@ -78,10 +58,8 @@ public class CustomMobileDriver implements WebDriverProvider {
         XCUITestOptions options = new XCUITestOptions();
         options.merge(capabilities);
         options.setCapability("bundleId", "ru.smartbuys.couriers");
-        options.setCapability("resetOnSessionStartOnly", "true");
-        options.setCapability("appium:showXcodeLog", true);
-        options.setCapability("unlockType", "pin");
-        options.setNoReset(true);
+        options.setCapability("wdaLocalPort", "8100");
+
 
         try {
             var remoteAddress = new URL("http://127.0.0.1:4723/wd/hub");

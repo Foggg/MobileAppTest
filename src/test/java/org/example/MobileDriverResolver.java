@@ -2,8 +2,6 @@ package org.example;
 
 import static com.codeborne.selenide.Selenide.closeWebDriver;
 import static com.codeborne.selenide.Selenide.open;
-import static com.codeborne.selenide.appium.AppiumDriverRunner.getAndroidDriver;
-import static com.codeborne.selenide.appium.AppiumDriverRunner.getIosDriver;
 
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
