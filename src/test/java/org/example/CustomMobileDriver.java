@@ -17,7 +17,6 @@ import javax.annotation.CheckReturnValue;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-
 /**
  * драйвер для доступа к ui android/ios
  */
@@ -58,8 +57,6 @@ public class CustomMobileDriver implements WebDriverProvider {
         XCUITestOptions options = new XCUITestOptions();
         options.merge(capabilities);
         options.setCapability("bundleId", "ru.smartbuys.couriers");
-        options.setCapability("wdaLocalPort", "8100");
-
 
         try {
             var remoteAddress = new URL("http://127.0.0.1:4723/wd/hub");
@@ -70,40 +67,4 @@ public class CustomMobileDriver implements WebDriverProvider {
             throw new RuntimeException("Failed to create IOSDriver", e);
         }
     }
-
-
-//    private WebDriver setUpIos(Capabilities capabilities) {
-//        String packageApp = getProperty("android.game.package");
-//        //String activityApp = getProperty("android.emp.activity");
-//
-//        XCUITestOptions options = new XCUITestOptions();
-//        //UiAutomator2Options options = new UiAutomator2Options();
-//        options.merge(capabilities);
-//        //options.setCapability("deviceName", "IosAutomationMobile");
-//        options.setCapability("platformName", "iOS");
-//        options.setCapability("appium:udid", "00008110-000279E83ABB801E");
-//        options.setCapability("appium:automationName", "XCUITest");
-//        options.setCapability("appium:bundleId", "ru.smartbuys.couriers");
-//        options.setCapability("appium:platformVersion", "18.4");
-//        options.setCapability("appium:webDriverAgentUrl", "http://localhost:7777");
-//        options.setCapability("appium:usePreinstalledWDA", "true");
-//        options.setCapability("app", "file-1747121561286.ipa");
-//        options.setCapability("appium:updatedWDABundleId", "file-1747121561286.ipa");
-//        options.setCapability("appium:prebuiltWDAPath", "/home/fog/WebDriverAgentRunner-Runner.app");
-//        //options.setAppPackage(packageApp);
-//        //options.setCapability("appium:remoteAdbHost", "localhost");//"host.docker.internal");
-//        //options.setCapability("appium:remoteAdbPort", "5037");
-//        //options.setCapability("uiautomator2ServerLaunchTimeout", 100000);
-//        //options.setAutoGrantPermissions(true);
-//        //options.setNoReset(true);
-//        //options.setSkipDeviceInitialization(true);
-//        try {
-//            var remoteAddress = new URL("http://127.0.0.1:4723/wd/hub");
-//            System.out.println("remoteAddress: " + remoteAddress);
-//            System.out.println("platform: " + options.getPlatformName());
-//            return new IOSDriver(remoteAddress, options);
-//        } catch (MalformedURLException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 }
